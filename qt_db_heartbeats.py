@@ -5,7 +5,7 @@ import wfdb
 import math
 import _pickle as pickle
 
-from utils.plotting import plot_segments
+from utils.visualization import plot_segments
 
 
 class Qt_DB_Heartbeats(object):
@@ -25,7 +25,7 @@ class Qt_DB_Heartbeats(object):
             path_parts = file_path.split(".dat")
             print(path_parts)
             # file_name = path_parts[0].split("/")[-1]  # linux 
-            file_name = path_parts[0].split("\\")[-1]  # windows
+            file_name = path_parts[0].split("/")[-1]  # windows
             print("current file name: ", file_name)
             signal, fields = wfdb.rdsamp(path_parts[0])
             sig_len = len(signal)
