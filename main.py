@@ -13,17 +13,17 @@ from eval_metrics import SSD, MAD, PRD, COS_SIM
 
 def main():
     # Generate hearbeat data from QT
-    # qt_path = 'data/qt-database-1.0.0/'
-    # heartbeats_generator = Qt_DB_Heartbeats(qt_path)
-    # heartbeats_generator.create_qt_heartbeats()
-    # heartbeats_generator.save_pkl()
-    # record_name = "sel100"
-    # heartbeats_generator.plot_heartbeats(record_name)
+    qt_path = 'data/qt-database-1.0.0/'
+    heartbeats_generator = Qt_DB_Heartbeats(qt_path)
+    heartbeats_generator.create_qt_heartbeats()
+    heartbeats_generator.save_pkl()
+    record_name = "sel100"
+    heartbeats_generator.plot_heartbeats(record_name)
 
     # Generate noise data from NSTDB
-    # nstdb_path = 'data/mit-bih-noise-stress-test-database-1.0.0/bw'
-    # blw_noise_generator = Nst_DB_Noise(nstdb_path)
-    # blw_noise_generator.create_bwl_noise()
+    nstdb_path = 'data/mit-bih-noise-stress-test-database-1.0.0/bw'
+    blw_noise_generator = Nst_DB_Noise(nstdb_path)
+    blw_noise_generator.create_bwl_noise()
 
     X_train, y_train, X_test, y_test = create_train_test_data()
     Dataset = [X_train, y_train, X_test, y_test]

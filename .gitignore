@@ -10,6 +10,7 @@ __pycache__/
 *.h5
 *.pt
 
+*.pkl
 # Distribution / packaging
 .Python
 build/
