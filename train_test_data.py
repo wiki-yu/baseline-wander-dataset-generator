@@ -25,12 +25,13 @@ def create_train_test_data():
 
     noise_test = np.concatenate((noise_channel1[0: int(noise_channel1.shape[0] * 0.13)], noise_channel2[0: int(noise_channel2.shape[0] * 0.13)]))
     noise_train = np.concatenate((noise_channel1[int(noise_channel1.shape[0] * 0.13):-1],noise_channel2[int(noise_channel2.shape[0] * 0.13):-1]))
-    print(np.shape(noise_train), np.shape(noise_test))
+    print("#############", np.shape(noise_train), np.shape(noise_test))
 
     heartbeats_train = []
     heartbeats_test = []
     test_set = ['sel123', 'sel233', 'sel302', 'sel307', 'sel820', 'sel853', 'sel16420','sel16795', 
     'sele0106','sele0121','sel32', 'sel49', 'sel14046','sel15814',]
+    test_set = ['sel123', 'sel233', 'sel302']
 
     qtdb_keys = list(qtdb.keys())
     print("qtdb len: ", len(qtdb_keys))
@@ -39,7 +40,7 @@ def create_train_test_data():
     samples = 512
     for i in range(len(qtdb_keys)):
         record_name = qtdb_keys[i]
-        print(record_name)
+        # print(record_name)
         # print(len(qtdb[record_name]))  # heartbeat amount in this record
 
         for heartbeat in qtdb[record_name]:
@@ -59,7 +60,8 @@ def create_train_test_data():
                 heartbeats_test.append(hb_normalized)
             else:
                 heartbeats_train.append(hb_normalized)
-        print("skip_beats: ", skip_beats)
+        # print("skip_beats: ", skip_beats)
+    # print("***************1 ", len(heartbeats_train), len(heartbeats_test))
 
     noise_index = 0
     sn_train = []
@@ -91,6 +93,7 @@ def create_train_test_data():
 
         if noise_index > (len(noise_test) - samples):
             noise_index = 0
+    # print("***************2 ", len(sn_train), len(sn_test))
 
     X_train = np.array(sn_train)
     y_train = np.array(heartbeats_train)
@@ -98,11 +101,12 @@ def create_train_test_data():
     X_test = np.array(sn_test)
     y_test = np.array(heartbeats_test)
 
+
     X_train = np.expand_dims(X_train, axis=2)
     y_train = np.expand_dims(y_train, axis=2)
 
     X_test = np.expand_dims(X_test, axis=2)
     y_test = np.expand_dims(y_test, axis=2)
 
-    return X_train, y_train, X_train, y_test
+    return X_train, y_train, X_test, y_test
 

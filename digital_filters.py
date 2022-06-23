@@ -165,10 +165,10 @@ def FIR_test_Dataset(Dataset):
     y_filter_out = []
 
     current_signal = 0
-
+    print("len X_test: ", len(X_test))
     for signal in X_test:
         current_signal += 1
-        #print('(FIR) Filtering signal ' + str(current_signal) + ' of ' + str(len(X_test)))
+        print('(FIR) Filtering signal ' + str(current_signal) + ' of ' + str(len(X_test)))
         s = np.squeeze(signal, axis=1).tolist()
 
         temp_signal, N = FIRRemoveBL(s, Fs, Fc_l, 4.5)
@@ -192,10 +192,10 @@ def IIR_test_Dataset(Dataset):
     y_filter_out = []
 
     current_signal = 0
-
+    print("len X_test: ", len(X_test))
     for signal in X_test:
         current_signal += 1
-        #print('(IIR) Filtering signal ' + str(current_signal) + ' of ' + str(len(X_test)))
+        print('(IIR) Filtering signal ' + str(current_signal) + ' of ' + str(len(X_test)))
         s = np.squeeze(signal, axis=1).tolist()
 
         temp_signal = IIRRemoveBL(s, Fs, Fc_l)

@@ -2,30 +2,32 @@ import numpy as np
 import _pickle as pickle
 from nstdb_noise import Nst_DB_Noise
 from qt_db_heartbeats import Qt_DB_Heartbeats
-from utils.visualization import plot_segments, generate_table
+from utils.visualization import plot_segments, generate_table, generate_table_time
 from train_test_data import create_train_test_data
 from datetime import datetime
 
 from digital_filters import FIR_test_Dataset
 from digital_filters import IIR_test_Dataset
 from eval_metrics import SSD, MAD, PRD, COS_SIM
+from dl_filters.dl_pipeline import train_dl, test_dl
 
 
 def main():
     # Generate hearbeat data from QT
-    qt_path = 'data/qt-database-1.0.0/'
-    heartbeats_generator = Qt_DB_Heartbeats(qt_path)
-    heartbeats_generator.create_qt_heartbeats()
-    heartbeats_generator.save_pkl()
-    record_name = "sel100"
-    heartbeats_generator.plot_heartbeats(record_name)
+    # qt_path = 'data/qt-database-1.0.0/'
+    # heartbeats_generator = Qt_DB_Heartbeats(qt_path)
+    # heartbeats_generator.create_qt_heartbeats()
+    # heartbeats_generator.save_pkl()
+    # record_name = "sel100"
+    # heartbeats_generator.plot_heartbeats(record_name)
 
-    # Generate noise data from NSTDB
-    nstdb_path = 'data/mit-bih-noise-stress-test-database-1.0.0/bw'
-    blw_noise_generator = Nst_DB_Noise(nstdb_path)
-    blw_noise_generator.create_bwl_noise()
+    # # Generate noise data from NSTDB
+    # nstdb_path = 'data/mit-bih-noise-stress-test-database-1.0.0/bw'
+    # blw_noise_generator = Nst_DB_Noise(nstdb_path)
+    # blw_noise_generator.create_bwl_noise()
 
     X_train, y_train, X_test, y_test = create_train_test_data()
+    print("&&& xtrain:{}, ytrain:{}, xtest:{}, ytest:{}".format(len(X_train), len(y_train), len(X_test), len(y_test)))
     Dataset = [X_train, y_train, X_test, y_test]
     print(X_train.shape, y_train.shape, X_test.shape, y_test.shape)
     print('Dataset ready to use.')
@@ -35,12 +37,45 @@ def main():
 
     # Classical Filters
     # FIR
+    train_time_list = []
+    test_time_list = []
+
+    dl_experiments = ['DRNN',
+                  'FCN-DAE',
+                  'Vanilla L',
+                  'Vanilla NL',
+                  'Multibranch LANL',
+                  'Multibranch LANLD'
+                  ]
+    dl_experiments = ['DRNN', 'Multibranch LANLD']
+
+
+
+
+    for experiment in range(len(dl_experiments)):
+        start_train = datetime.now()
+        train_dl(Dataset, dl_experiments[experiment])
+        end_train = datetime.now()
+        train_time_list.append(end_train - start_train)
+
+        start_test = datetime.now()
+        [X_test, y_test, y_pred] = test_dl(Dataset, dl_experiments[experiment])
+        end_test = datetime.now()
+        test_time_list.append(end_test - start_test)
+
+        test_results = [X_test, y_test, y_pred]
+
+        # Save Results
+        with open('test_results_' + dl_experiments[experiment] + '.pkl', 'wb') as output:  # Overwrites any existing file.
+            pickle.dump(test_results, output)
+        print('Results from experiment ' + dl_experiments[experiment] + ' saved')
+
     print('Running FIR fiter on the test set. This will take a while (2h)...')
-    # start_test = datetime.now()
+    start_test = datetime.now()
     [X_test_f, y_test_f, y_filter] = FIR_test_Dataset(Dataset)
-    # end_test = datetime.now()
-    # train_time_list.append(0)
-    # test_time_list.append(end_test - start_test)
+    end_test = datetime.now()
+    train_time_list.append(0)
+    test_time_list.append(end_test - start_test)
 
     test_results_FIR = [X_test_f, y_test_f, y_filter]
 
@@ -51,11 +86,11 @@ def main():
 
     # IIR
     print('Running IIR fiter on the test set. This will take a while (25 mins)...')
-    # start_test = datetime.now()
+    start_test = datetime.now()
     [X_test_f, y_test_f, y_filter] = IIR_test_Dataset(Dataset)
-    # end_test = datetime.now()
-    # train_time_list.append(0)
-    # test_time_list.append(end_test - start_test)
+    end_test = datetime.now()
+    train_time_list.append(0)
+    test_time_list.append(end_test - start_test)
 
     test_results_IIR = [X_test_f, y_test_f, y_filter]
 
@@ -65,10 +100,10 @@ def main():
     print('Results from experiment IIR filter saved')
 
     # Saving timing list
-    # timing = [train_time_list, test_time_list]
-    # with open('timing.pkl', 'wb') as output:  # Overwrites any existing file.
-    #     pickle.dump(timing, output)
-    # print('Timing saved')
+    timing = [train_time_list, test_time_list]
+    with open('timing.pkl', 'wb') as output:  # Overwrites any existing file.
+        pickle.dump(timing, output)
+    print('Timing saved')
     
     # Load Result FIR Filter
     with open('test_results_FIR.pkl', 'rb') as input:
@@ -97,9 +132,9 @@ def main():
     ####### LOAD EXPERIMENTS #######
 
     # # Load timing
-    # with open('timing.pkl', 'rb') as input:
-    #     timing = pickle.load(input)
-    #     [train_time_list, test_time_list] = timing
+    with open('timing.pkl', 'rb') as input:
+        timing = pickle.load(input)
+        [train_time_list, test_time_list] = timing
 
     # Load Result FIR Filter
     with open('test_results_FIR.pkl', 'rb') as input:
@@ -159,8 +194,8 @@ def main():
     generate_table(metrics, metric_values, Exp_names)
 
     # # Timing table
-    # timing_var = ['training', 'test']
-    # generate_table_time(timing_var, timing, Exp_names, gpu=True)
+    timing_var = ['training', 'test']
+    generate_table_time(timing_var, timing, Exp_names, gpu=True)
 
 
 if __name__ == "__main__":
